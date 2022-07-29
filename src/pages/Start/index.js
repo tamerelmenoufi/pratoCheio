@@ -1,0 +1,167 @@
+import React, {useState, useEffect, useContext} from "react"
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { View,
+         Text,
+         StyleSheet,
+         Image,
+         TouchableOpacity
+        } from 'react-native'
+import * as Animatable from 'react-native-animatable'
+import { useNavigation } from '@react-navigation/native'
+import db from "../../Services/sqlite/connect";
+import { AuthContext } from '../../contexts/auth'
+
+const comandoSql = (query) => {
+    return new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+        //comando SQL modificável
+        tx.executeSql(
+            query,
+            [],
+            //-----------------------
+            (_, { rowsAffected, insertId, rows }) => {
+            resolve({rowsAffected, insertId, rows})
+            // if (rowsAffected > 0) resolve({rowsAffected, insertId, rows});
+            // else reject("Error inserting query: " + JSON.stringify(query)); // insert falhou
+            },
+            (_, error) => reject('Erro de cadastro: '+error) // erro interno em tx.executeSql
+        );
+        });
+    });
+};
+
+export default function Start(){
+    const navegation = useNavigation()
+
+    const {sessaoRestaurante:logado} = useContext(AuthContext)
+
+    return(
+        <View style={styles.container}>
+            <View style={styles.containerLogo}>
+                <Animatable.Image
+                    animation="flipInY"
+                    source={require('../../assets/logo.png')}
+                    style={{width:'100%'}}
+                    resizeMode="contain"
+                />
+            </View>
+
+            <Animatable.View delay={600} animation="fadeInUp" style={styles.containerForm}>
+                <View style={{flex:3}}>
+                    <Text style={styles.title}>Prato Cheio - Governo do Amazonas</Text>
+                    <Text style={styles.text}>Para iniciar os cadastros acesso a localização do seu restaurante</Text>
+                </View>
+                {logado.restaurante?
+                <>
+                <View style={{flex:1}}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={()=> navegation.navigate('Login')}
+                    >
+                        <Text style={styles.buttonText}>{logado.titulo} {logado.local}</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={{flex:2, flexDirection:'row'}}>
+                    <View style={{flex:1}}>
+                        <TouchableOpacity
+                            style={styles.button2}
+                            onPress={()=> navegation.navigate('Restaurantes')}
+                        >
+                            <Icon name="fish" size={20} color="#fff" />
+                            <Text style={styles.buttonText}>Restaurantes</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{flex:1}}>
+                        <TouchableOpacity
+                            style={styles.button2}
+                            onPress={()=> navegation.navigate('ListaUsuarios')}
+                        >
+                            <Icon name="users" size={20} color="#fff" />
+                            <Text style={styles.buttonText}>Usuários</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={{flex:1}}>
+                        <TouchableOpacity
+                            style={styles.button2}
+                            onPress={()=> navegation.navigate('Restaurantes')}
+                        >
+                            <Icon name="hand-point-up" size={20} color="#fff" />
+                            <Text style={styles.buttonText}>Votos</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                </View>
+                </>
+                :
+                <View style={{flex:1}}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={()=> navegation.navigate('Restaurantes')}
+                    >
+                        <Text style={styles.buttonText}>Localizar Restaurante</Text>
+                    </TouchableOpacity>
+                </View>
+                }
+
+            </Animatable.View>
+
+        </View>
+    )
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex:1,
+        backgroundColor:'#1daf4c'
+    },
+    containerLogo:{
+        flex:2,
+        justifyContent:'center',
+        textAlign:'center'
+    },
+    containerForm:{
+        flex:1,
+        backgroundColor:'#fff',
+        borderTopLeftRadius:25,
+        borderTopRightRadius:25,
+        paddingStart:'5%',
+        paddingEnd:'5%'
+    },
+    title:{
+        fontSize:24,
+        fontWeight:'bold',
+        marginBottom:28,
+        marginTop:28
+    },
+    text:{
+        color:'#a1a1a1'
+    },
+    button:{
+        position:'absolute',
+        backgroundColor:'#1daf4c',
+        borderRadius:50,
+        paddingVertical:8,
+        width:'60%',
+        alignSelf:'center',
+        bottom:'15%',
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    button2:{
+        position:'absolute',
+        backgroundColor:'red',
+        borderRadius:50,
+        paddingVertical:8,
+        width:'90%',
+        alignSelf:'center',
+        bottom:'15%',
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    buttonText:{
+        fontSize:14,
+        color:'#fff',
+        fontWeight:'bold'
+    }
+})
