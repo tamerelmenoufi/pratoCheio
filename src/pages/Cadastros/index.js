@@ -1,5 +1,5 @@
-import React, {useContext, useEffect} from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, BackHandler } from 'react-native'
+import React, {useContext} from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -13,7 +13,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const api = axios.create({
     baseURL:'http://project.mohatron.com/projectRestaurantes/api/'
 })
-
 
   const comandoSql = (query) => {
     return new Promise((resolve, reject) => {
@@ -36,44 +35,31 @@ const api = axios.create({
 
 
 
-
-const Pesquisa = ()=>{
-
-
-
+const Cadastros = ()=>{
 
     const navegation = useNavigation();
     const {sessaoUsuario, sessaoRestaurante} = useContext(AuthContext)
 
+
     const schema = yup.object({
+        cpf: yup.string().min(14,'Informe o número do CPF completo').required("Informe o número do CPF").nullable(),
         nome: yup.string().required("Informe seu nome completo").nullable(),
-        telefone: yup.string().required("Informe seu telefone").nullable(),
+        telefone: yup.string().min(15,'Digite o número do telefone completo').required("Informe seu telefone").nullable(),
         endereco: yup.string().required("Seu Endereço").nullable(),
     })
 
 
     const { control, handleSubmit, formState:{errors}, reset } = useForm({
         resolver: yupResolver(schema),
-        defaultValues:{
-                        nome: sessaoUsuario.nome,
-                        telefone: sessaoUsuario.telefone,
-                        endereco:sessaoUsuario.endereco
-                    },
+        // defaultValues:{
+        //     cpf: sessaoUsuario.cpf,
+        //     nome: sessaoUsuario.nome,
+        //     telefone: sessaoUsuario.telefone,
+        //     endereco:sessaoUsuario.endereco
+        // },
     })
 
-
-    const backAction = () => {
-        navegation.navigate("Login")
-    }
-
-    useEffect(() => {
-        BackHandler.addEventListener("hardwareBackPress", backAction);
-
-        return () =>
-          BackHandler.removeEventListener("hardwareBackPress", backAction);
-      }, []);
-
-    function handleSignIn(data, voto){
+    function handleSignIn(data){
 
         let dataEnvio = new Date();
         let dataFormatada = dataEnvio.getFullYear() +
@@ -90,25 +76,25 @@ const Pesquisa = ()=>{
 
         // console.warn(dataFormatada)
         //Cadastro
-        comandoSql( `REPLACE INTO usuarios (codigo, nome, cpf, telefone, restaurante, titulo, local, endereco, data, origem, upload) VALUES ('${sessaoUsuario.codigo}','${data.nome}','${sessaoUsuario.cpf}','${data.telefone}','${sessaoRestaurante.restaurante}','${sessaoRestaurante.titulo}','${sessaoRestaurante.local}','${data.endereco}','${dataFormatada}','${sessaoUsuario.origem}','n')`)
+        comandoSql( `REPLACE INTO usuarios (nome, cpf, telefone, restaurante, titulo, local, endereco, data, origem, upload) VALUES ('${data.nome}','${data.cpf}','${data.telefone}','${sessaoRestaurante.restaurante}','${sessaoRestaurante.titulo}','${sessaoRestaurante.local}','${data.endereco}','${dataFormatada}','cpf','n')`)
         .then( retorno => {
 
             api.post('/cadUser.php', {
-                codigo: sessaoUsuario.codigo,
+                codigo: retorno.insertId,
                 nome: data.nome,
-                cpf: sessaoUsuario.cpf,
+                cpf: data.cpf,
                 telefone: data.telefone,
                 titulo: sessaoRestaurante.titulo,
                 local: sessaoRestaurante.local,
                 restaurante: sessaoRestaurante.restaurante,
                 endereco: data.endereco,
-                origem: sessaoUsuario.origem,
+                origem: 'cpf',
                 data: dataFormatada,
             }).then(({data}) => {
                 // console.warn(data)
                 //  alert(data.message)
                 if(data.status){
-                    comandoSql( `UPDATE usuarios SET upload = 's' WHERE codigo = '${sessaoUsuario.codigo}'`)
+                    comandoSql( `UPDATE usuarios SET upload = 's' WHERE codigo = '${retorno.insertId}'`)
                 }
 
 
@@ -121,54 +107,33 @@ const Pesquisa = ()=>{
         })
         .catch( err => console.warn('Erro de cadastro: ' + err) )
 
-
-
-        //Voto
-        comandoSql( `INSERT INTO votos (restaurante, usuario, voto, data, upload) VALUES ('${sessaoRestaurante.restaurante}','${sessaoUsuario.cpf}','${voto}','${dataFormatada}','n')`)
-        .then( retorno => {
-            const NovoId = retorno.insertId;
-            api.post('/cadVoto.php', {
-                restaurante: sessaoRestaurante.restaurante,
-                usuario: sessaoUsuario.cpf,
-                voto: voto,
-                data: dataFormatada,
-            }).then(({data}) => {
-                // console.warn(data)
-                //   alert(data.message)
-
-                if(data.status){
-                    comandoSql( `UPDATE votos SET upload = 's' where codigo = '${NovoId}'`)
-                }
-
-            }).catch( err => console.warn('no upload: ' + err) )
-
-        })
-        .catch( err => console.warn('Erro de cadastro: ' + err) )
-
-        alert("Voto Registrado!\nObrigado pela sua contribuição.")
+        alert("Cadastro realizado com sucesso!")
         navegation.navigate("Start")
+
 
     }
 
 
-    const Ruim = (data) => {handleSignIn(data, 'Ruim')}
-    const Regular = (data) => {handleSignIn(data, 'Regular')}
-    const Bom = (data) => {handleSignIn(data, 'Bom')}
-    const Otimo = (data) => {handleSignIn(data, 'Otimo')}
-    const Excelente = (data) => {handleSignIn(data, 'Excelente')}
-
-    const BtVoto = 125
-
-
     return (
-
 
         <View style={{flex:1, width:'100%', justifyContent:'center', alignItems:'center'}}>
             <View style={{width:'95%', height:40, marginTop:30}}>
                 <Text style={{color:'#333', fontSize:20, padding:5}}>Registro dos dados</Text>
             </View>
-            <View style={{flex:6,width:'95%'}}>
+            <View style={{flex:14,width:'95%'}}>
                 <ScrollView style={{flex:1, paddingEnd:30, paddingStart:30, width:'100%'}}>
+
+                    <InputForm
+                        campo="cpf"
+                        rotulo="CPF"
+                        placeholder="Digite o número do CPF"
+                        control={control}
+                        errors={errors.cpf}
+                        value=''
+                        mask={true}
+                        type={'cpf'}
+                        options={false}
+                    />
 
                     <InputForm
                         campo="nome"
@@ -176,11 +141,12 @@ const Pesquisa = ()=>{
                         placeholder="Digite seu nome"
                         control={control}
                         errors={errors.nome}
-                        value={sessaoUsuario.nome}
+                        value=''
                         mask={false}
                         type={false}
                         options={false}
                     />
+
 
                     <InputForm
                         campo="telefone"
@@ -188,7 +154,7 @@ const Pesquisa = ()=>{
                         placeholder="Digite seu Telefone"
                         control={control}
                         errors={errors.telefone}
-                        value={sessaoUsuario.telefone}
+                        value=''
                         mask={true}
                         type={'cel-phone'}
                         options={{
@@ -204,7 +170,7 @@ const Pesquisa = ()=>{
                         placeholder="Rua, bairro, casa, CEP, complemento, Bairro, Cidade - Estado"
                         control={control}
                         errors={errors.endereco}
-                        value={sessaoUsuario.endereco}
+                        value=''
                         mask={false}
                         type={false}
                         options={false}
@@ -212,33 +178,12 @@ const Pesquisa = ()=>{
 
                 </ScrollView>
             </View>
-            <View style={{padding:0, margin:0}}>
-                <Text style={{color:'#333', fontSize:20, padding:0}}>Sua opinião quanto ao atendimento e ao restaurante</Text>
-            </View>
+
             <View style={{flex:3,width:'95%', height:40, flexDirection:'row', flexWrap:'nowrap', justifyContent:'center'}}>
-                <TouchableOpacity style={{height:BtVoto, width:BtVoto, margin:20, borderRadius:100, backgroundColor:'red', justifyContent:'center', alignItems:'center'}} onPress={handleSubmit(Ruim)}>
-                    <Icon name="frown-o" size={BtVoto} color="#fff" />
-                    {/* <Text style={{color:'#fff', fontSize:10, padding:5}}>RUIM</Text> */}
+                <TouchableOpacity style={{height:60, flexDirection:'row', width:'60%', margin:20, borderRadius:100, backgroundColor:'green', justifyContent:'center', alignItems:'center'}} onPress={handleSubmit(handleSignIn)}>
+                    <Icon name="user" size={25} color="#fff" />
+                    <Text style={{color:'#fff', fontSize:25, padding:5}}>CADASTRAR</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity style={{height:BtVoto, width:BtVoto, margin:20, borderRadius:100, backgroundColor:'orange', justifyContent:'center', alignItems:'center'}} onPress={handleSubmit(Bom)}>
-                    <Icon name="meh-o" size={BtVoto} color="#fff" />
-                    {/* <Text style={{color:'#fff', fontSize:10, padding:5, height:40}}>BOM</Text> */}
-                </TouchableOpacity>
-
-                <TouchableOpacity style={{height:BtVoto, width:BtVoto, margin:20, borderRadius:100, backgroundColor:'green', justifyContent:'center', alignItems:'center'}} onPress={handleSubmit(Excelente)}>
-                    <Icon name="smile-o" size={BtVoto} color="#fff" />
-                    {/* <Text style={{color:'#fff', fontSize:10, padding:5, height:40}}>EXCELENTE</Text> */}
-                </TouchableOpacity>
-
-                {/* <TouchableOpacity style={{height:40, borderRadius:8, backgroundColor:'green'}} onPress={handleSubmit(Otimo)}>
-                    <Text style={{color:'#fff', fontSize:20, padding:5, height:40}}>ÓTIMO</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={{height:40, borderRadius:8, backgroundColor:'blue'}} onPress={handleSubmit(Excelente)}>
-                    <Text style={{color:'#fff', fontSize:20, padding:5}}>EXCELENTE</Text>
-                </TouchableOpacity> */}
-
             </View>
 
         </View>
@@ -246,7 +191,7 @@ const Pesquisa = ()=>{
     )
 }
 
-export default Pesquisa
+export default Cadastros
 
 
 const styles = StyleSheet.create({

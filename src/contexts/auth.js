@@ -43,9 +43,9 @@ function AuthProvider({children}){
 
         })
         .catch( err => {
-             console.warn('Erro de cadastro: '+err)
+            comandoSql( `INSERT INTO restaurante (restaurante, titulo, local) VALUES ('','','')`)
+            console.warn('Erro de cadastro: '+err)
         })
-
 
 
     }),[setSessaoRestaurante];
@@ -61,7 +61,7 @@ function AuthProvider({children}){
             return false
         }
 
-
+        comandoSql( `UPDATE usuarios SET origem = 'cpf' WHERE cpf = '${cpf}'`)
         comandoSql( `SELECT * FROM usuarios WHERE cpf = '${cpf}'`)
         .then( retorno => {
             // alert(retorno.rows.length)
@@ -71,26 +71,32 @@ function AuthProvider({children}){
                             // console.warn('TEM:')
                             // console.warn(c)
                             setSessaoUsuario(c)
+                            navegation.navigate("Pesquisa")
                         })
+
             }else{
-                comandoSql( `INSERT INTO usuarios (cpf) VALUES ('${cpf}')`)
+                comandoSql( `INSERT INTO usuarios (cpf, origem) VALUES ('${cpf}', 'cpf')`).
+                then(()=>{
+                    comandoSql( `SELECT * FROM usuarios WHERE cpf = '${cpf}'`)
+                    .then( retorno => {
+                        retorno.rows._array.forEach( c => {
+                                    // results.push(c)
+                                    // console.warn('NÃO TEM:')
+                                    // console.warn(c)
+                                    setSessaoUsuario(c)
+                                    navegation.navigate("Pesquisa")
+                                })
 
-                comandoSql( `SELECT * FROM usuarios WHERE cpf = '${cpf}'`)
-                .then( retorno => {
-                    retorno.rows._array.forEach( c => {
-                                // results.push(c)
-                                // console.warn('NÃO TEM:')
-                                // console.warn(c)
-                                setSessaoUsuario(c)
-                            })
+                    })
+                    .catch( err => {
+                        console.warn('Erro de cadastro: '+err)
+                    })
+                })
 
-                })
-                .catch( err => {
-                     console.warn('Erro de cadastro: '+err)
-                })
+
 
             }
-            navegation.navigate("Pesquisa")
+            // navegation.navigate("Pesquisa")
         })
         .catch( err => {
              console.warn('Erro de cadastro: '+err)
@@ -117,7 +123,7 @@ function AuthProvider({children}){
 
             })
             .catch( err => {
-                 console.warn('Erro de cadastro: '+err)
+                console.warn('Erro de cadastro: '+err)
             })
 
         })
@@ -143,7 +149,7 @@ function AuthProvider({children}){
     }
 
     return(
-        <AuthContext.Provider value={{ nome:"Tamer Elmenoufi", logarUsuario, sessaoRestaurante, AtivarRestaurante, sessaoUsuario }}>
+        <AuthContext.Provider value={{ nome:"Tamer Elmenoufi", logarUsuario, setSessaoUsuario, sessaoRestaurante, AtivarRestaurante, sessaoUsuario }}>
             {children}
         </AuthContext.Provider>
     )

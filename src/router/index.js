@@ -5,6 +5,9 @@ import Restaurantes from "../pages/Restaurantes";
 import Login from '../pages/Login'
 import Pesquisa from '../pages/Pesquisa'
 import ListaUsuarios from '../pages/usuarios'
+import Votos from '../pages/Votos'
+import QrCode from '../QrCode'
+ import Cadastros from '../pages/Cadastros'
 
 // import Formulario from '../pages/Formularios/index'
 // import Lista from '../pages/Formularios/lista'
@@ -39,19 +42,21 @@ export default function Router(){
                 component={ListaUsuarios}
                 options={{ headerShown: false }}
             />
-
-            {/*
-
             <Stack.Screen
-                name="Formulario"
-                component={Formulario}
-                options={{ headerShown: true }}
+                name="Votos"
+                component={Votos}
+                options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="Lista"
-                component={Lista}
-                options={{ headerShown: true }}
-            /> */}
+                name="QrCode"
+                component={QrCode}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="Cadastros"
+                component={Cadastros}
+                options={{ headerShown: false }}
+            />
 
         </Stack.Navigator>
     );

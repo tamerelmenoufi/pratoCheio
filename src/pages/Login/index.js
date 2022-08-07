@@ -2,8 +2,6 @@ import React, {useState, useEffect, useContext} from "react"
 import { View,
          Text,
          StyleSheet,
-         Image,
-         TextInput,
          TouchableOpacity
         } from 'react-native'
 import * as Animatable from 'react-native-animatable'
@@ -11,7 +9,7 @@ import { useNavigation } from '@react-navigation/native'
 import db from "../../Services/sqlite/connect";
 import { AuthContext } from '../../contexts/auth'
 import { TextInputMask } from 'react-native-masked-text'
-
+import Icon from 'react-native-vector-icons/AntDesign'
 
 const comandoSql = (query) => {
     return new Promise((resolve, reject) => {
@@ -37,8 +35,8 @@ export default function Login(){
 
     const {sessaoRestaurante:logado, logarUsuario, sessaoUsuario} = useContext(AuthContext)
 
-    const [cpf, setCpf] = useState(sessaoUsuario.cpf);
-
+    const [cpf, setCpf] = useState('');
+    // sessaoUsuario.cpf  valor  em ^
 
 
     useEffect(()=>{
@@ -60,13 +58,13 @@ export default function Login(){
 
             <Animatable.View delay={600} animation="fadeInUp" style={styles.containerForm}>
 
-                <View style={{flex:1}}>
-                    <Text style={styles.formTitle}>Prato Cheio - Governo do Amazonas</Text>
+                <View style={{flex:2}}>
+                    <Text style={styles.formTitle}>Prato Cheio - Governo do Estado do Amazonas</Text>
                     <Text style={styles.formText}>Você está logado em {logado.titulo} {logado.local}</Text>
                 </View>
 
                 <View style={{flex:3}}>
-                    <Text style={styles.formTitle}>CPF do Avaliador</Text>
+                    <Text style={styles.formTitle}>CPF do Usuário</Text>
                     {/* <TextInputMask
                         placeholder="Digite o número do CPF ..."
                         style={styles.formInput}
@@ -86,13 +84,32 @@ export default function Login(){
                         onChangeText={(text)=>{setCpf(text)}}
                         type={'cpf'}
                     />
+                </View>
+                <View style={{flex:3, flexDirection:'row', justifyContent:'center', alignItems:'baseline'}}>
+
                     <TouchableOpacity
                         style={styles.button}
                         onPress={()=> logarUsuario(cpf)}
                     >
+                        <Icon name="codesquareo" size={50} color="#fff" />
                         <Text style={styles.formButtonText}>INICIAR</Text>
                     </TouchableOpacity>
 
+                    <TouchableOpacity
+                            style={styles.button2}
+                            onPress={()=> navegation.navigate("QrCode")}
+                        >
+                            <Icon name="scan1" size={50} color="#fff" />
+                            <Text style={styles.formButtonText}>QrCode</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                            style={styles.button3}
+                            onPress={()=> navegation.navigate("Cadastros")}
+                        >
+                            <Icon name="user" size={50} color="#fff" />
+                            <Text style={styles.formButtonText}>Cadastro</Text>
+                    </TouchableOpacity>
 
                 </View>
 
@@ -130,26 +147,40 @@ const styles = StyleSheet.create({
         color:'#a1a1a1'
     },
     button:{
-        position:'absolute',
+        position:'relative',
         backgroundColor:'#1daf4c',
         borderRadius:50,
         paddingVertical:8,
-        width:'60%',
+        width:'30%',
         alignSelf:'center',
         bottom:'15%',
         alignItems:'center',
-        justifyContent:'center'
+        justifyContent:'center',
+        margin:10,
     },
     button2:{
-        position:'absolute',
-        backgroundColor:'red',
+        position:'relative',
+        backgroundColor:'blue',
         borderRadius:50,
         paddingVertical:8,
-        width:'60%',
+        width:'30%',
         alignSelf:'center',
         bottom:'15%',
         alignItems:'center',
-        justifyContent:'center'
+        justifyContent:'center',
+        margin:10,
+    },
+    button3:{
+        position:'relative',
+        backgroundColor:'orange',
+        borderRadius:50,
+        paddingVertical:8,
+        width:'30%',
+        alignSelf:'center',
+        bottom:'15%',
+        alignItems:'center',
+        justifyContent:'center',
+        margin:10,
     },
     buttonText:{
         fontSize:18,
@@ -195,7 +226,6 @@ const styles = StyleSheet.create({
     },
     formButtonRegisterText:{
         color:'#a1a1a1',
-
     }
 
 })

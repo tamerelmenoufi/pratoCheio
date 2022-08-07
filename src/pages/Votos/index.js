@@ -32,21 +32,21 @@ const api = axios.create({
     baseURL:'http://project.mohatron.com/projectRestaurantes/api/'
 })
 
-export default ListaUsuarios => {
+export default ListaVotos => {
 
     const navegation = useNavigation()
     const {AtivarRestaurante} = useContext(AuthContext)
 
-    const [usuarios, setusuarios] = useState([])
+    const [votos, setVotos] = useState([])
 
 
-    function AtualizarListaUsuarios(){
+    function AtualizarListaVotos(){
         // (codigo, nome, cpf, telefone, restaurante, titulo, local, endereco, data, upload)
 
         let data = new Date();
         let dataFormatada = data.getFullYear() + "-" + ((data.getMonth() + 1)) + "-" + (data.getDate());
         // console.warn(dataFormatada)
-        comandoSql( `SELECT * FROM usuarios where upload != 's' or data like '%${dataFormatada}%'`)
+        comandoSql( `SELECT a.*, c.nome, (b.titulo || ' ' || b.local) as restaurante FROM votos a LEFT JOIN restaurante b ON a.restaurante = b.restaurante left join usuarios c on a.usuario = c.cpf where a.upload != 's' or a.data LIKE '%${dataFormatada}%'`)
         .then( retorno => {
 
             // api.post('/cadUser.php', {
@@ -63,7 +63,7 @@ export default ListaUsuarios => {
             //     // console.warn(data)
             //     //  alert(data.message)
             //     if(data.status){
-            //         comandoSql( `UPDATE usuarios SET upload = 's' WHERE codigo = '${sessaoUsuario.codigo}'`)
+            //         comandoSql( `UPDATE votos SET upload = 's' WHERE codigo = '${sessaoUsuario.codigo}'`)
             //     }
 
 
@@ -78,14 +78,14 @@ export default ListaUsuarios => {
                 dados.push(c)
 
             })
-            setusuarios(dados)
+            setVotos(dados)
 
         })
     }
 
     useEffect(()=>{
 
-        AtualizarListaUsuarios()
+        AtualizarListaVotos()
 
 
     },[])
@@ -93,10 +93,10 @@ export default ListaUsuarios => {
 
     function EnviarNuvem(cod = false){
         if(cod){
-            var query = `SELECT * FROM usuarios where codigo = '${cod}'`
+            var query = `SELECT * FROM votos where codigo = '${cod}'`
             // alert('com codigo')
         }else{
-            var query = `SELECT * FROM usuarios where upload != 's'`
+            var query = `SELECT * FROM votos where upload != 's'`
             // alert('sem codigo')
         }
         comandoSql(query)
@@ -105,22 +105,27 @@ export default ListaUsuarios => {
             // alert(retorno.rows.length)
             retorno.rows._array.forEach( c => {
                 // console.warn(c)
-                api.post('/cadUser.php', {
-                    codigo: c.codigo,
-                    nome: c.nome,
-                    cpf: c.cpf,
-                    telefone: c.telefone,
-                    titulo: c.titulo,
-                    local: c.local,
+
+
+                // " codigo INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                // " restaurante INTEGER,"+
+                // " usuario INTEGER,"+
+                // " voto TEXT,"+
+                // " data TEXT," +
+                // " upload VARCHAR(2)"+
+
+
+                api.post('/cadVoto.php', {
                     restaurante: c.restaurante,
-                    endereco: c.endereco,
+                    usuario: c.usuario,
+                    voto: c.voto,
                     data: c.data,
                 }).then(({data}) => {
                     // console.warn(data)
                     //   alert(data.message)
                     if(data.status){
-                        comandoSql( `UPDATE usuarios SET upload = 's' WHERE codigo = '${c.codigo}'`)
-                        AtualizarListaUsuarios()
+                        comandoSql( `UPDATE votos SET upload = 's' WHERE codigo = '${c.codigo}'`)
+                        AtualizarListaVotos()
                     }
 
                 }).catch( err => console.warn('no upload: ' + err) )
@@ -131,7 +136,7 @@ export default ListaUsuarios => {
     }
 
 
-    function getUsuariosItem({item}){
+    function getvotosItem({item}){
 
         const Cor = (item.upload == 's' ? '#1daf4c':'#cccccc')
 
@@ -170,14 +175,14 @@ export default ListaUsuarios => {
                 }}>
                     <Text style={{
                         paddingHorizontal:16,
-                        fontSize:10,
+                        fontSize:11,
                         color:'#a1a1a1',
-                    }}>{item.cpf} - {item.telefone}</Text>
+                    }}>{item.restaurante}: {item.usuario} - {item.nome}</Text>
                     <Text style={{
                         paddingHorizontal:16,
-                        fontSize:20,
+                        fontSize:15,
                         color:'#333',
-                    }}>{item.nome}</Text>
+                    }}>Votou {item.voto} em {item.data}</Text>
                     {/* <Text style={{
                         paddingHorizontal:16,
                         fontSize:15,
@@ -222,11 +227,11 @@ export default ListaUsuarios => {
                 <Text style={{
                     paddingVertical:10,
                     fontSize:20,
-                }}>Lista de Usuários</Text>
+                }}>Lista de Votos</Text>
                 <FlatList
                     keyExtractor={usuario => usuario.codigo}
-                    data={usuarios}
-                    renderItem={getUsuariosItem}
+                    data={votos}
+                    renderItem={getvotosItem}
                 />
             </View>
             <View style={{padding:30, width:'100%', alignItems:'center', justifyContent:'center'}}>
