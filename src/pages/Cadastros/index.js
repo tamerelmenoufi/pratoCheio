@@ -11,7 +11,7 @@ import { AuthContext } from '../../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const api = axios.create({
-    baseURL:'http://project.mohatron.com/projectRestaurantes/api/'
+    baseURL:'https://pratocheio.p2.log.br/api/'
 })
 
   const comandoSql = (query) => {

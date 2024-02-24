@@ -13,13 +13,13 @@ let dataFormatada = dataEnvio.getFullYear() +
 
   db.transaction((tx) => {
       //<<<<<<<<<<<<<<<<<<<<<<<< USE ISSO APENAS DURANTE OS TESTES!!! >>>>>>>>>>>>>>>>>>>>>>>
-      // tx.executeSql("DROP TABLE restaurante;");
+      //tx.executeSql("DROP TABLE restaurante;");
       //<<<<<<<<<<<<<<<<<<<<<<<< USE ISSO APENAS DURANTE OS TESTES!!! >>>>>>>>>>>>>>>>>>>>>>>
       tx.executeSql("CREATE TABLE IF NOT EXISTS restaurante (codigo INTEGER PRIMARY KEY AUTOINCREMENT, restaurante INTEGER, titulo TEXT, local TEXT);");
       // tx.executeSql(`REPLACE INTO restaurante (codigo, restaurante, titulo, local) VALUES ('1','','','')`)
 
     //<<<<<<<<<<<<<<<<<<<<<<<< USE ISSO APENAS DURANTE OS TESTES!!! >>>>>>>>>>>>>>>>>>>>>>>
-    // tx.executeSql("DROP TABLE usuarios;");
+    //tx.executeSql("DROP TABLE usuarios;");
     // console.warn(`DELETE FROM usuarios WHERE data NOT LIKE '%${dataFormatada}%' AND upload = 's'`)
 
     tx.executeSql(
@@ -44,7 +44,7 @@ let dataFormatada = dataEnvio.getFullYear() +
 
 
     //<<<<<<<<<<<<<<<<<<<<<<<< USE ISSO APENAS DURANTE OS TESTES!!! >>>>>>>>>>>>>>>>>>>>>>>
-    // tx.executeSql("DROP TABLE votos;");
+    //tx.executeSql("DROP TABLE votos;");
     //<<<<<<<<<<<<<<<<<<<<<<<< USE ISSO APENAS DURANTE OS TESTES!!! >>>>>>>>>>>>>>>>>>>>>>>
 
     tx.executeSql(

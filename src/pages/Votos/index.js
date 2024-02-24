@@ -29,7 +29,7 @@ const comandoSql = (query) => {
 
 
 const api = axios.create({
-    baseURL:'http://project.mohatron.com/projectRestaurantes/api/'
+    baseURL:'https://pratocheio.p2.log.br/api/'
 })
 
 export default ListaVotos => {

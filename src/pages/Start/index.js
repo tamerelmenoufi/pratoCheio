@@ -13,7 +13,7 @@ import db from "../../Services/sqlite/connect";
 import { AuthContext } from '../../contexts/auth'
 
 const api = axios.create({
-    baseURL:'http://project.mohatron.com/projectRestaurantes/api/'
+    baseURL:'https://pratocheio.p2.log.br/api/'
 })
 
 const comandoSql = (query) => {
